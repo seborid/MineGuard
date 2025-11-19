@@ -1,100 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout 
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="horizontal"
     android:background="@drawable/bg_control_panel"
-    android:padding="@dimen/padding_md"
-    android:elevation="@dimen/card_elevation_sm">
+    android:padding="12dp"
+    android:elevation="4dp">
 
     <!-- 截图按钮 -->
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/btn_screenshot"
-        style="@style/Widget.MineGuard.Button"
         android:layout_width="0dp"
-        android:layout_height="@dimen/control_button_height"
-        android:layout_marginEnd="@dimen/spacing_xs"
+        android:layout_height="40dp"
+        android:layout_weight="1"
         android:text="截图"
-        android:textSize="@dimen/text_size_xs"
-        app:icon="@drawable/ic_camera"
-        app:iconGravity="textStart"
-        app:iconSize="@dimen/icon_size_sm"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btn_record"
-        app:layout_constraintHorizontal_weight="1" />
+        android:textSize="12sp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/bg_button_primary"
+        android:layout_marginEnd="4dp"
+        android:drawableStart="@drawable/ic_camera"
+        android:drawablePadding="4dp"
+        android:gravity="center" />
 
     <!-- 录像按钮 -->
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/btn_record"
-        style="@style/Widget.MineGuard.Button"
         android:layout_width="0dp"
-        android:layout_height="@dimen/control_button_height"
-        android:layout_marginEnd="@dimen/spacing_xs"
+        android:layout_height="40dp"
+        android:layout_weight="1"
         android:text="录像"
-        android:textSize="@dimen/text_size_xs"
-        app:icon="@drawable/ic_record"
-        app:iconGravity="textStart"
-        app:iconSize="@dimen/icon_size_sm"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btn_screenshot"
-        app:layout_constraintEnd_toStartOf="@+id/btn_talk"
-        app:layout_constraintHorizontal_weight="1" />
+        android:textSize="12sp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/bg_button_primary"
+        android:layout_marginEnd="4dp"
+        android:drawableStart="@drawable/ic_record"
+        android:drawablePadding="4dp"
+        android:gravity="center" />
 
     <!-- 对讲按钮 -->
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/btn_talk"
-        style="@style/Widget.MineGuard.Button"
         android:layout_width="0dp"
-        android:layout_height="@dimen/control_button_height"
-        android:layout_marginEnd="@dimen/spacing_xs"
+        android:layout_height="40dp"
+        android:layout_weight="1"
         android:text="对讲"
-        android:textSize="@dimen/text_size_xs"
-        app:icon="@drawable/ic_mic"
-        app:iconGravity="textStart"
-        app:iconSize="@dimen/icon_size_sm"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btn_record"
-        app:layout_constraintEnd_toStartOf="@+id/btn_fullscreen"
-        app:layout_constraintHorizontal_weight="1" />
+        android:textSize="12sp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/bg_button_primary"
+        android:layout_marginEnd="4dp"
+        android:drawableStart="@drawable/ic_mic"
+        android:drawablePadding="4dp"
+        android:gravity="center" />
 
     <!-- 全屏按钮 -->
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/btn_fullscreen"
-        style="@style/Widget.MineGuard.Button"
         android:layout_width="0dp"
-        android:layout_height="@dimen/control_button_height"
-        android:layout_marginEnd="@dimen/spacing_xs"
+        android:layout_height="40dp"
+        android:layout_weight="1"
         android:text="全屏"
-        android:textSize="@dimen/text_size_xs"
-        app:icon="@drawable/ic_fullscreen"
-        app:iconGravity="textStart"
-        app:iconSize="@dimen/icon_size_sm"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btn_talk"
-        app:layout_constraintEnd_toStartOf="@+id/btn_close"
-        app:layout_constraintHorizontal_weight="1" />
+        android:textSize="12sp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/bg_button_primary"
+        android:layout_marginEnd="4dp"
+        android:drawableStart="@drawable/ic_fullscreen"
+        android:drawablePadding="4dp"
+        android:gravity="center" />
 
     <!-- 关闭按钮 -->
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/btn_close"
-        style="@style/Widget.MineGuard.Button.Secondary"
         android:layout_width="0dp"
-        android:layout_height="@dimen/control_button_height"
+        android:layout_height="40dp"
+        android:layout_weight="1"
         android:text="关闭"
-        android:textSize="@dimen/text_size_xs"
-        app:icon="@drawable/ic_close"
-        app:iconGravity="textStart"
-        app:iconSize="@dimen/icon_size_sm"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btn_fullscreen"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="1" />
+        android:textSize="12sp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/bg_button_secondary"
+        android:drawableStart="@drawable/ic_close"
+        android:drawablePadding="4dp"
+        android:gravity="center" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

@@ -14,9 +14,7 @@ import android.os.Vibrator;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.google.android.material.textfield.TextInputEditText;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.widget.SearchView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
@@ -51,7 +49,7 @@ public class AlarmFragment extends Fragment implements AlarmAdapter.OnAlarmClick
     private static final int NOTIFICATION_ID = 1001;
 
     private RecyclerView recyclerView;
-    private TextInputEditText searchView;
+    private SearchView searchView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private AlarmAdapter alarmAdapter;
     private List<AlarmItem> alarmList;
@@ -156,20 +154,17 @@ public class AlarmFragment extends Fragment implements AlarmAdapter.OnAlarmClick
     }
 
     private void setupSearchView() {
-        searchView.addTextChangedListener(new TextWatcher() {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // 不需要处理
+            public boolean onQueryTextSubmit(String query) {
+                filterAlarms(query);
+                return false;
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterAlarms(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                // 不需要处理
+            public boolean onQueryTextChange(String newText) {
+                filterAlarms(newText);
+                return false;
             }
         });
     }
@@ -312,7 +307,7 @@ public class AlarmFragment extends Fragment implements AlarmAdapter.OnAlarmClick
     }
 
     private void applyFilters() {
-        filterAlarms(searchView.getText().toString());
+        filterAlarms(searchView.getQuery().toString());
     }
 
     private void clearFilters() {
