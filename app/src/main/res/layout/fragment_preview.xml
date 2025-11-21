@@ -63,7 +63,7 @@
                 android:layout_height="wrap_content"
                 android:text="0 个设备"
                 android:textSize="14sp"
-                android:textColor="@color/text_secondary"
+                android:textColor="@color/text_color"
                 android:background="@drawable/bg_status_default"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
@@ -178,7 +178,7 @@
                     android:minHeight="0dp"
                     android:paddingHorizontal="12dp" />
 
-                <Button
+                <!-- <Button
                     android:id="@+id/btn_mode_sixteen"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
@@ -188,7 +188,7 @@
                     android:background="@android:color/transparent"
                     android:minWidth="0dp"
                     android:minHeight="0dp"
-                    android:paddingHorizontal="12dp" />
+                    android:paddingHorizontal="12dp" /> -->
 
             </LinearLayout>
 

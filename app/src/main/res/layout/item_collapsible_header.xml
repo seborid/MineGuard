@@ -19,7 +19,7 @@
         android:rotation="0" />
 
     <TextView
-        android:id="@+id/tv_region_name"
+        android:id="@+id/tv_location_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:text="0/0 在线"
         android:textSize="14sp"
-        android:textColor="@color/text_secondary"
+        android:textColor="@color/text_color"
         android:background="@drawable/bg_status_default"
         android:paddingHorizontal="8dp"
         android:paddingVertical="4dp"
@@ -43,7 +43,7 @@
     <Button
         android:id="@+id/btn_quick_view"
         android:layout_width="wrap_content"
-        android:layout_height="32dp"
+        android:layout_height="35dp"
         android:text="快速查看"
         android:textSize="12sp"
         android:textColor="@android:color/white"

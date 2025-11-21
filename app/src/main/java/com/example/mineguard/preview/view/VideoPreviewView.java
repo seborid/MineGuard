@@ -18,7 +18,6 @@ import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
 import org.videolan.libvlc.util.VLCVideoLayout;
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -71,9 +70,8 @@ public class VideoPreviewView extends FrameLayout implements TextureView.Surface
         tvDeviceStatus = findViewById(R.id.tv_device_status);
         statusIndicator = findViewById(R.id.status_indicator);
 
-        vlcVideoLayout = new VLCVideoLayout(getContext());
-        vlcVideoLayout.setVisibility(GONE);
-        addView(vlcVideoLayout, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        // 从 XML 布局中获取 VLCVideoLayout（已在 XML 中定义）
+        vlcVideoLayout = findViewById(R.id.vlc_video_layout);
 
         textureView.setSurfaceTextureListener(this);
 
@@ -96,10 +94,10 @@ public class VideoPreviewView extends FrameLayout implements TextureView.Surface
         this.currentDevice = device;
         updateDeviceInfo();
 
-        if (device != null && device.isOnline() && device.getVideoUrl() != null) {
+        if (device != null && device.is_online() && device.getFlow() != null) {
             Log.d(TAG, "Device is online with a video URL. Starting playback.");
             stopVideoPlayback();
-            initializeRTSP(device.getVideoUrl());
+            initializeRTSP(device.getFlow());
         } else {
             Log.d(TAG, "Device is offline or has no video URL. Stopping playback.");
             stopVideoPlayback();
@@ -115,17 +113,14 @@ public class VideoPreviewView extends FrameLayout implements TextureView.Surface
         }
 
         tvDeviceName.setText(currentDevice.getName());
-        tvDeviceStatus.setText(currentDevice.getStatusName());
+        tvDeviceStatus.setText(currentDevice.is_online() ? "在线" : "离线");
 
-        switch (currentDevice.getStatus()) {
-            case DeviceItem.STATUS_ONLINE:
+        switch (currentDevice.is_online() ? "在线" : "离线") {
+            case "在线":
                 statusIndicator.setBackgroundColor(getResources().getColor(R.color.primary_green));
                 break;
-            case DeviceItem.STATUS_OFFLINE:
+            case "离线":
                 statusIndicator.setBackgroundColor(getResources().getColor(R.color.text_secondary));
-                break;
-            case DeviceItem.STATUS_ERROR:
-                statusIndicator.setBackgroundColor(getResources().getColor(R.color.primary_red));
                 break;
         }
     }
@@ -133,14 +128,17 @@ public class VideoPreviewView extends FrameLayout implements TextureView.Surface
     private void initializeRTSP(String videoUrl) {
         Log.d(TAG, "initializeRTSP with URL: " + videoUrl);
         try {
-            Log.e(TAG, "VLC-try-Error", new Throwable("Info"));
             String rtspUrl = videoUrl;
-            Log.d(TAG, "RTSPURL地址是: " + rtspUrl);
+            Log.d(TAG, "RTSP URL: " + rtspUrl);
 
             ArrayList<String> options = new ArrayList<>();
             options.add("--rtsp-tcp");
             options.add("--network-caching=10000");
             options.add("--avcodec-hw=any");
+            // 禁用音频，避免多个摄像头的音频输出导致 AudioTrack 资源耗尽
+            options.add("--no-audio");
+            // 减少日志输出，提升性能
+            options.add("-vvv");
 
             vlcVideoLayout.setVisibility(VISIBLE);
             ivPlaceholder.setVisibility(GONE);
@@ -158,18 +156,48 @@ public class VideoPreviewView extends FrameLayout implements TextureView.Surface
             isPrepared = true;
             textureView.setVisibility(GONE);
             Log.d(TAG, "LibVLC MediaPlayer started. RTSP should be playing.");
-        } catch (Exception e) {
-            Log.e(TAG, "VLC---Error Error initializing RTSP playback: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            // 处理 MediaPlayer 状态异常
+            Log.e(TAG, "IllegalStateException in RTSP playback: " + e.getMessage());
             e.printStackTrace();
-            if (vlcPlayer != null) {
-                try { vlcPlayer.stop(); } catch (Exception ignore) {}
-                try { vlcPlayer.detachViews(); } catch (Exception ignore) {}
-            }
-            isPrepared = false;
-            ivPlaceholder.setVisibility(VISIBLE);
-            vlcVideoLayout.setVisibility(GONE);
-            textureView.setVisibility(GONE);
+            handlePlaybackError();
+        } catch (Exception e) {
+            // 捕获所有其他异常，防止崩溃
+            Log.e(TAG, "Exception in RTSP playback: " + e.getClass().getName() + " - " + e.getMessage());
+            e.printStackTrace();
+            handlePlaybackError();
         }
+    }
+    
+    /**
+     * 处理播放错误，确保所有资源被正确释放
+     */
+    private void handlePlaybackError() {
+        Log.d(TAG, "handlePlaybackError called");
+        try {
+            if (vlcPlayer != null) {
+                try {
+                    vlcPlayer.stop();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error stopping player in error handler", e);
+                }
+                try {
+                    vlcPlayer.detachViews();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error detaching views in error handler", e);
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error in error handler", e);
+        }
+        
+        isPrepared = false;
+        ivPlaceholder.setVisibility(VISIBLE);
+        vlcVideoLayout.setVisibility(GONE);
+        textureView.setVisibility(GONE);
+        
+        // 释放资源
+        releaseMediaPlayer();
     }
 
     private void stopVideoPlayback() {
@@ -207,6 +235,31 @@ public class VideoPreviewView extends FrameLayout implements TextureView.Surface
         vlcVideoLayout.setVisibility(GONE);
         textureView.setVisibility(GONE);
     }
+    
+    /**
+     * 释放 MediaPlayer 和 LibVLC 资源
+     */
+    private void releaseMediaPlayer() {
+        if (vlcPlayer != null) {
+            try {
+                vlcPlayer.release();
+                Log.d(TAG, "VLC MediaPlayer released");
+            } catch (Exception e) {
+                Log.e(TAG, "Error releasing VLC MediaPlayer", e);
+            }
+            vlcPlayer = null;
+        }
+        
+        if (libVLC != null) {
+            try {
+                libVLC.release();
+                Log.d(TAG, "LibVLC released");
+            } catch (Exception e) {
+                Log.e(TAG, "Error releasing LibVLC", e);
+            }
+            libVLC = null;
+        }
+    }
 
     public void setOnPreviewClickListener(OnPreviewClickListener listener) {
         this.clickListener = listener;
@@ -237,7 +290,6 @@ public class VideoPreviewView extends FrameLayout implements TextureView.Surface
     @Override
     public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
         Log.d(TAG, "onSurfaceTextureAvailable: Surface Texture is now available.");
-        // 使用 LibVLC 渲染到 VLCVideoLayout，TextureView 不参与渲染。
     }
 
     @Override
@@ -269,8 +321,5 @@ public class VideoPreviewView extends FrameLayout implements TextureView.Surface
             libVLC = null;
         }
     }
-
-    // 使用 LibVLC 播放，不再需要 Android MediaPlayer 错误解析方法。
-
-    // 使用 LibVLC 播放，不再需要 Android MediaPlayer 错误解析方法。
 }
+

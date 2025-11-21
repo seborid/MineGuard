@@ -60,20 +60,20 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/tv_device_type"
+                android:id="@+id/tv_device_model"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="设备类型"
+                android:text="设备模型"
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary" />
 
             <TextView
-                android:id="@+id/tv_device_area"
+                android:id="@+id/tv_device_ip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="设备位置"
+                android:text="设备ip"
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary" />
 
@@ -84,7 +84,7 @@
                 android:layout_marginTop="4dp"
                 android:text="设备状态"
                 android:textSize="12sp"
-                android:textColor="@color/text_secondary"
+                android:textColor="@color/text_color"
                 android:background="@drawable/bg_status_default"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="2dp" />

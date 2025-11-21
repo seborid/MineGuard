@@ -111,7 +111,7 @@ public class ControlButtonsView extends FrameLayout {
         }
         
         // 只有在线设备才能使用控制功能
-        boolean isOnline = currentDevice.isOnline();
+        boolean isOnline = currentDevice.is_online();
         setButtonsEnabled(isOnline);
         
         // 更新录制和对讲状态

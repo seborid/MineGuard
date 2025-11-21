@@ -4,43 +4,48 @@ package com.example.mineguard.preview.model;
  * 设备信息模型类
  */
 public class DeviceItem {
-    public static final int TYPE_CAMERA = 1;
-    public static final int TYPE_SENSOR = 2;
-    public static final int TYPE_ALARM = 3;
-    
-    public static final int STATUS_ONLINE = 1;
-    public static final int STATUS_OFFLINE = 2;
-    public static final int STATUS_ERROR = 3;
-    
-    private String id;
+
+    private int id;
     private String name;
-    private String area;
-    private String region;
-    private int type;
-    private int status;
-    private String videoUrl;
-    private boolean isRecording;
-    private boolean isTalking;
-    private long lastUpdateTime;
+    private String ip;
+    private String admin;
+    private String passwd;
+    private String flow;
+    private boolean is_online;
+    private String location;
+    private String board_ip;
+    private String algorithm;
+
+
+
+  
+    private boolean isRecording; //设备是否正在录像的标志
+    private boolean isTalking;//设备是否正在对讲的标志
+    private long lastUpdateTime;//设备最后一次更新状态的时间
     
     public DeviceItem() {
     }
     
-    public DeviceItem(String id, String name, String area, String region, int type, int status) {
+    public DeviceItem(int id, String name, String ip, String admin,String passwd,
+                      String flow, boolean is_online, String location,
+                      String board_ip,  String algorithm) {
         this.id = id;
         this.name = name;
-        this.area = area;
-        this.region = region;
-        this.type = type;
-        this.status = status;
-        this.lastUpdateTime = System.currentTimeMillis();
+        this.ip = ip;
+        this.admin = admin;
+        this.passwd = passwd;
+        this.flow = flow;
+        this.is_online = is_online;
+        this.location = location;
+        this.board_ip = board_ip;
+        this.algorithm = algorithm;
     }
-    
-    public String getId() {
+
+    public int getId() {
         return id;
     }
     
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
     
@@ -52,46 +57,71 @@ public class DeviceItem {
         this.name = name;
     }
     
-    public String getArea() {
-        return area;
+    public String getIp() {
+        return ip;
+   
     }
-    
-    public void setArea(String area) {
-        this.area = area;
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
-    
-    public String getRegion() {
-        return region;
+
+    public String getAdmin() {
+        return admin;
     }
-    
-    public void setRegion(String region) {
-        this.region = region;
+
+    public void setAdmin(String admin) {
+        this.admin = admin;
     }
-    
-    public int getType() {
-        return type;
+
+    public String getPasswd() {
+        return passwd;
     }
-    
-    public void setType(int type) {
-        this.type = type;
+
+    public void setPasswd(String passwd) {
+        this.passwd = passwd;
     }
-    
-    public int getStatus() {
-        return status;
+
+    public String getFlow() {
+        return flow;
     }
-    
-    public void setStatus(int status) {
-        this.status = status;
+
+    public void setFlow(String flow) {
+        this.flow = flow;
     }
-    
-    public String getVideoUrl() {
-        return videoUrl;
+
+    public boolean is_online() {
+        return is_online;
     }
-    
-    public void setVideoUrl(String videoUrl) {
-        this.videoUrl = videoUrl;
+
+    public void set_online(boolean _online) {
+        is_online = _online;
     }
-    
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getBoard_ip() {
+        return board_ip;
+    }
+
+    public void setBoard_ip(String board_ip) {
+        this.board_ip = board_ip;
+    }
+
+    public String getAlgorithm() {
+        return algorithm;
+    }
+
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
+    }
+ 
     public boolean isRecording() {
         return isRecording;
     }
@@ -116,33 +146,33 @@ public class DeviceItem {
         this.lastUpdateTime = lastUpdateTime;
     }
     
-    public String getTypeName() {
-        switch (type) {
-            case TYPE_CAMERA:
-                return "摄像头";
-            case TYPE_SENSOR:
-                return "传感器";
-            case TYPE_ALARM:
-                return "报警器";
-            default:
-                return "未知设备";
-        }
-    }
+    // public String getTypeName() {
+    //     switch (type) {
+    //         case TYPE_CAMERA:
+    //             return "摄像头";
+    //         case TYPE_SENSOR:
+    //             return "传感器";
+    //         case TYPE_ALARM:
+    //             return "报警器";
+    //         default:
+    //             return "未知设备";
+    //     }
+    // }
     
-    public String getStatusName() {
-        switch (status) {
-            case STATUS_ONLINE:
-                return "在线";
-            case STATUS_OFFLINE:
-                return "离线";
-            case STATUS_ERROR:
-                return "故障";
-            default:
-                return "未知";
-        }
-    }
+    // public String getStatusName() {
+    //     switch (status) {
+    //         case STATUS_ONLINE:
+    //             return "在线";
+    //         case STATUS_OFFLINE:
+    //             return "离线";
+    //         case STATUS_ERROR:
+    //             return "故障";
+    //         default:
+    //             return "未知";
+    //     }
+    // }
     
-    public boolean isOnline() {
-        return status == STATUS_ONLINE;
-    }
+    // public boolean isOnline() {
+    //     return status == STATUS_ONLINE;
+    // }
 }
