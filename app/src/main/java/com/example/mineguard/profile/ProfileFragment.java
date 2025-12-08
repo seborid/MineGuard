@@ -131,12 +131,37 @@ public class ProfileFragment extends Fragment {
         
         showInfoDialog("关于我们", aboutText);
     }
-    
+
+    // === 核心方法：通用美化弹窗 ===
     private void showInfoDialog(String title, String content) {
-        new androidx.appcompat.app.AlertDialog.Builder(getContext())
-                .setTitle(title)
-                .setMessage(content)
-                .setPositiveButton("确定", null)
-                .show();
+        if (getContext() == null) return;
+
+        // 1. 加载我们在 XML 里写的漂亮布局
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_common_info, null);
+
+        // 2. 找到布局里的控件
+        TextView tvTitle = dialogView.findViewById(R.id.tv_dialog_title);
+        TextView tvContent = dialogView.findViewById(R.id.tv_dialog_content); // 这个就是显示长文本的地方
+        View btnConfirm = dialogView.findViewById(R.id.btn_dialog_confirm);
+
+        // 3. 【重点】把传入的 title 和 content 设置给控件
+        tvTitle.setText(title);     // 设置标题
+        tvContent.setText(content); // 设置内容 (这里会显示那一大段文字)
+
+        // 4. 创建弹窗
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(getContext())
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        // 5. 设置背景透明（为了让圆角显示出来）
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        // 6. 按钮点击关闭
+        btnConfirm.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 }
