@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F7FA">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.18" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.82" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_left_data"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:layout_constraintBottom_toTopOf="@+id/barrier_bottom_controls"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_left"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="4dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="设备"
+                android:textColor="#333"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_device_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="8dp"
+                tools:listitem="@layout/item_device_card" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_center_video"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        app:cardBackgroundColor="#000000"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:layout_constraintBottom_toTopOf="@+id/barrier_bottom_controls"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_right"
+        app:layout_constraintStart_toEndOf="@+id/guideline_left"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <FrameLayout
+            android:id="@+id/video_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <GridLayout
+                android:id="@+id/grid_4_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:columnCount="2"
+                android:rowCount="2">
+
+                <FrameLayout android:layout_width="0dp" android:layout_height="0dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="1dp" android:background="#222">
+                    <SurfaceView android:id="@+id/sv_cam_01" android:layout_width="match_parent" android:layout_height="match_parent" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="4dp" android:text="CAM 01" android:textColor="#FFF" android:textSize="12sp" android:background="#80000000"/>
+                </FrameLayout>
+                <FrameLayout android:layout_width="0dp" android:layout_height="0dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="1dp" android:background="#222">
+                    <SurfaceView android:id="@+id/sv_cam_02" android:layout_width="match_parent" android:layout_height="match_parent" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="4dp" android:text="CAM 02" android:textColor="#FFF" android:textSize="12sp" android:background="#80000000"/>
+                </FrameLayout>
+                <FrameLayout android:layout_width="0dp" android:layout_height="0dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="1dp" android:background="#222">
+                    <SurfaceView android:id="@+id/sv_cam_03" android:layout_width="match_parent" android:layout_height="match_parent" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="4dp" android:text="CAM 03" android:textColor="#FFF" android:textSize="12sp" android:background="#80000000"/>
+                </FrameLayout>
+                <FrameLayout android:layout_width="0dp" android:layout_height="0dp" android:layout_rowWeight="1" android:layout_columnWeight="1" android:layout_margin="1dp" android:background="#222">
+                    <SurfaceView android:id="@+id/sv_cam_04" android:layout_width="match_parent" android:layout_height="match_parent" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="4dp" android:text="CAM 04" android:textColor="#FFF" android:textSize="12sp" android:background="#80000000"/>
+                </FrameLayout>
+            </GridLayout>
+
+            <FrameLayout
+                android:id="@+id/grid_1_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                tools:visibility="gone">
+                <SurfaceView android:id="@+id/sv_cam_main" android:layout_width="match_parent" android:layout_height="match_parent" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="top|center_horizontal" android:padding="8dp" android:text="Main Camera (Live)" android:textColor="#FFF" android:textSize="16sp" android:background="#80000000" />
+            </FrameLayout>
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_right_alarm"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:layout_constraintBottom_toTopOf="@+id/barrier_bottom_controls"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/guideline_right"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="4dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="报警"
+                android:textColor="#D32F2F"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_alarm_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="8dp"
+                tools:listitem="@layout/item_alarm_card" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier_bottom_controls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="btn_disarm,btn_grid_1,btn_grid_4" />
+
+    <Button
+        android:id="@+id/btn_disarm"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:text="撤防"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/card_center_video" />
+
+    <Button
+        android:id="@+id/btn_close"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="关闭"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_disarm"
+        app:layout_constraintStart_toEndOf="@+id/btn_disarm" />
+
+    <Button
+        android:id="@+id/btn_intercom"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="对讲"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_disarm"
+        app:layout_constraintStart_toEndOf="@+id/btn_close" />
+
+    <ImageButton
+        android:id="@+id/btn_grid_4"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="四宫格视图"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_four_grid"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_disarm"
+        app:layout_constraintEnd_toEndOf="@+id/card_center_video"
+        app:layout_constraintTop_toTopOf="@+id/btn_disarm" />
+
+    <ImageButton
+        android:id="@+id/btn_grid_1"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="一宫格视图"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_single_grid"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_grid_4"
+        app:layout_constraintEnd_toStartOf="@+id/btn_grid_4"
+        app:layout_constraintTop_toTopOf="@+id/btn_grid_4" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
