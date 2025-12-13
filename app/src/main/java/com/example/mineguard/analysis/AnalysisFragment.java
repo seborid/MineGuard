@@ -27,7 +27,9 @@ import com.example.mineguard.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import androidx.lifecycle.ViewModelProvider;
+import com.example.mineguard.data.DeviceItem;
+import com.example.mineguard.data.DeviceViewModel;
 public class AnalysisFragment extends Fragment {
 
     private View grid1View;
@@ -44,6 +46,9 @@ public class AnalysisFragment extends Fragment {
     private ExoPlayer[] gridPlayers = new ExoPlayer[4];          // 存放 4 个播放器实例
     // 模拟 4 个摄像头的地址 (目前先都用同一个测试，以后你可以换成不同的)
     private String[] gridUrls;
+    //  新增：ViewModel 和 Adapter 变量
+    private DeviceViewModel deviceViewModel;
+    private SimpleDeviceAdapter deviceAdapter;
 
     @Nullable
     @Override
@@ -71,17 +76,23 @@ public class AnalysisFragment extends Fragment {
         grid1View = view.findViewById(R.id.grid_1_view);
         grid4View = view.findViewById(R.id.grid_4_view);
 
+        // 1. 获取 ViewModel 实例 (与 ConfigurationFragment 共享实例)
+        // 【关键修改点 A】使用 Activity 作为作用域，确保与 ConfigurationFragment 共享实例
+        deviceViewModel = new ViewModelProvider(requireActivity()).get(DeviceViewModel.class);
         RecyclerView rvDeviceList = view.findViewById(R.id.rv_device_list);
         rvDeviceList.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        List<String> mockDevices = new ArrayList<>();
-        mockDevices.add("主井皮带机CAM01");
-        mockDevices.add("破碎站入口CAM02");
-        mockDevices.add("通风井口CAM03");
-        mockDevices.add("变电所CAM04");
-
-        SimpleDeviceAdapter deviceAdapter = new SimpleDeviceAdapter(mockDevices);
+        // 2. 初始化 Adapter
+        deviceAdapter = new SimpleDeviceAdapter(new ArrayList<>());
         rvDeviceList.setAdapter(deviceAdapter);
+
+        // 3. 【关键】观察 LiveData，使用 getViewLifecycleOwner()
+        deviceViewModel.getLiveDeviceList().observe(getViewLifecycleOwner(), deviceItems -> {
+            // 当 LiveData.setValue() 被调用时，无论是在 ConfigurationFragment 还是其他地方，
+            // 这里的 lambda 表达式都会被触发！
+            // 核心：用新数据更新 Adapter，并通知 RecyclerView 刷新。
+            deviceAdapter.setDeviceList(deviceItems);
+        });
 
         RecyclerView rvAlarmList = view.findViewById(R.id.rv_alarm_list);
         rvAlarmList.setLayoutManager(new LinearLayoutManager(getContext()));

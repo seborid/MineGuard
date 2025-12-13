@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mineguard.R;
-
+import com.example.mineguard.data.DeviceItem;
 import java.util.List;
 
 /**
@@ -19,12 +19,17 @@ import java.util.List;
  */
 public class SimpleDeviceAdapter extends RecyclerView.Adapter<SimpleDeviceAdapter.ViewHolder> {
 
-    private final List<String> deviceList;
+    private List<DeviceItem> deviceList;
 
-    public SimpleDeviceAdapter(List<String> deviceList) {
+    public SimpleDeviceAdapter(List<DeviceItem> deviceList) {
         this.deviceList = deviceList;
     }
-
+    // 新增 setDeviceList 方法，用于 LiveData 更新
+    public void setDeviceList(List<DeviceItem> newDeviceList) {
+        this.deviceList = newDeviceList;
+        // 通知 RecyclerView 整个数据集已更改
+        notifyDataSetChanged();
+    }
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -35,25 +40,27 @@ public class SimpleDeviceAdapter extends RecyclerView.Adapter<SimpleDeviceAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String deviceName = deviceList.get(position);
+        //String deviceName = deviceList.get(position);
+        DeviceItem deviceItem = deviceList.get(position); // 【修改点 3】获取 DeviceItem
+        // 【修改点 4】使用 DeviceItem 的 getter 方法设置文本
+        holder.tvName.setText(deviceItem.getDeviceName());
+        holder.tvIp.setText(deviceItem.getIpAddress()); // 使用 IP 地址
 
-        holder.tvName.setText(deviceName);
-        holder.tvIp.setText("192.168.10." + (100 + position));
+        // --- 动态设置状态样式 ---
+        String status = deviceItem.getStatus();
+//        holder.tvName.setText(deviceName);
+//        holder.tvIp.setText("192.168.10." + (100 + position));
 
-        // --- 动态设置状态样式 (核心修改) ---
-        boolean isOnline = (position != 2); // 模拟第3个设备离线，其他在线
+        // 假设 status 字符串是 "在线" 或 "离线"
+        boolean isOnline = "在线".equals(status);
 
         if (isOnline) {
             holder.tvStatus.setText("在线");
-            // 设置文字颜色：深绿色
             holder.tvStatus.setTextColor(Color.parseColor("#2E7D32"));
-            // 动态生成背景：浅绿色 + 圆角
             holder.tvStatus.setBackground(createStatusBackground("#E8F5E9"));
         } else {
             holder.tvStatus.setText("离线");
-            // 设置文字颜色：深灰色
             holder.tvStatus.setTextColor(Color.parseColor("#616161"));
-            // 动态生成背景：浅灰色 + 圆角
             holder.tvStatus.setBackground(createStatusBackground("#F5F5F5"));
         }
     }
