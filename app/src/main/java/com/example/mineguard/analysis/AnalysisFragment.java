@@ -2,6 +2,7 @@ package com.example.mineguard.analysis;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -11,44 +12,44 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.media3.common.MediaItem; // 新增导入
-import androidx.media3.exoplayer.ExoPlayer; // 新增导入
-import androidx.media3.ui.PlayerView; // 新增导入
-
-// 👇 补上这几行
-import android.view.SurfaceView;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.media3.common.MediaItem;
+import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.rtsp.RtspMediaSource;
 import androidx.media3.exoplayer.source.MediaSource;
-
+import androidx.media3.ui.PlayerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.mineguard.MainActivity; // 导入 MainActivity
 import com.example.mineguard.R;
+import com.example.mineguard.alarm.model.AlarmItem; // 导入 AlarmItem
+import com.example.mineguard.data.DeviceViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
-import androidx.lifecycle.ViewModelProvider;
-import com.example.mineguard.data.DeviceItem;
-import com.example.mineguard.data.DeviceViewModel;
-public class AnalysisFragment extends Fragment {
+
+// 1. 实现监听接口 MainActivity.OnAlarmReceivedListener
+public class AnalysisFragment extends Fragment implements MainActivity.OnAlarmReceivedListener {
 
     private View grid1View;
     private View grid4View;
 
-    // 1. 定义播放器变量
     private PlayerView playerView;
     private ExoPlayer player;
-    // 替换成你真实的 RTSP 地址
     private String rtspUrl = "rtsp://192.168.31.64/live/raw";
 
-    // === 新增：四宫格相关变量 ===
-    private SurfaceView[] gridSurfaceViews = new SurfaceView[4]; // 存放 XML 里的 sv_cam_01 等
-    private ExoPlayer[] gridPlayers = new ExoPlayer[4];          // 存放 4 个播放器实例
-    // 模拟 4 个摄像头的地址 (目前先都用同一个测试，以后你可以换成不同的)
+    private SurfaceView[] gridSurfaceViews = new SurfaceView[4];
+    private ExoPlayer[] gridPlayers = new ExoPlayer[4];
     private String[] gridUrls;
-    //  新增：ViewModel 和 Adapter 变量
+
     private DeviceViewModel deviceViewModel;
     private SimpleDeviceAdapter deviceAdapter;
+
+    // === 2. 新增报警列表相关变量 ===
+    private RecyclerView rvAlarmList;
+    private AlarmAdapter alarmAdapter; // 注意这里用的是 analysis 包下的 Adapter
+    private List<AlarmItem> displayAlarmList = new ArrayList<>(); // 真实数据列表
 
     @Nullable
     @Override
@@ -60,51 +61,93 @@ public class AnalysisFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 2. 绑定 PlayerView 控件
-        // 注意：这里要对应你在 XML 修改后的 ID
+        // 初始化视图控件
         playerView = view.findViewById(R.id.player_view_main);
-
-        // === 新增：绑定 4 个 SurfaceView ===
         gridSurfaceViews[0] = view.findViewById(R.id.sv_cam_01);
         gridSurfaceViews[1] = view.findViewById(R.id.sv_cam_02);
         gridSurfaceViews[2] = view.findViewById(R.id.sv_cam_03);
         gridSurfaceViews[3] = view.findViewById(R.id.sv_cam_04);
-        // 初始化 4 个地址 (这里为了测试，我全部填了一样的)
         gridUrls = new String[] { rtspUrl, rtspUrl, rtspUrl, rtspUrl };
-
-        // --- 原有的逻辑保持不变 ---
         grid1View = view.findViewById(R.id.grid_1_view);
         grid4View = view.findViewById(R.id.grid_4_view);
 
-        // 1. 获取 ViewModel 实例 (与 ConfigurationFragment 共享实例)
-        // 【关键修改点 A】使用 Activity 作为作用域，确保与 ConfigurationFragment 共享实例
+        // 初始化设备列表 (ViewModel)
         deviceViewModel = new ViewModelProvider(requireActivity()).get(DeviceViewModel.class);
         RecyclerView rvDeviceList = view.findViewById(R.id.rv_device_list);
         rvDeviceList.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        // 2. 初始化 Adapter
         deviceAdapter = new SimpleDeviceAdapter(new ArrayList<>());
         rvDeviceList.setAdapter(deviceAdapter);
-
-        // 3. 【关键】观察 LiveData，使用 getViewLifecycleOwner()
         deviceViewModel.getLiveDeviceList().observe(getViewLifecycleOwner(), deviceItems -> {
-            // 当 LiveData.setValue() 被调用时，无论是在 ConfigurationFragment 还是其他地方，
-            // 这里的 lambda 表达式都会被触发！
-            // 核心：用新数据更新 Adapter，并通知 RecyclerView 刷新。
             deviceAdapter.setDeviceList(deviceItems);
         });
 
-        RecyclerView rvAlarmList = view.findViewById(R.id.rv_alarm_list);
+        // === 3. 初始化报警列表 (关键修改) ===
+        rvAlarmList = view.findViewById(R.id.rv_alarm_list);
         rvAlarmList.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        List<String> mockAlarms = new ArrayList<>();
-        mockAlarms.add("皮带跑偏告警 #1");
-        mockAlarms.add("人员入侵检测 #2");
-        mockAlarms.add("温度异常升高 #3");
-
-        AlarmAdapter alarmAdapter = new AlarmAdapter(mockAlarms);
+        // 这里的 displayAlarmList 一开始是空的，稍后在 onResume 加载
+        alarmAdapter = new AlarmAdapter(displayAlarmList);
         rvAlarmList.setAdapter(alarmAdapter);
 
+        // 按钮事件绑定
+        setupClickListeners(view);
+    }
+
+    // === 4. 生命周期管理：注册/注销监听 ===
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // 只有当宿主是 MainActivity 时才执行
+        if (getActivity() instanceof MainActivity) {
+            MainActivity mainActivity = (MainActivity) getActivity();
+
+            // 注册监听器：有新报警时通知我
+            mainActivity.addAlarmListener(this);
+
+            // 每次页面显示时，从全局列表同步一次最新数据 (防止漏掉)
+            loadDataFromActivity(mainActivity);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // 页面不可见时，取消监听，节省资源
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).removeAlarmListener(this);
+        }
+    }
+
+    // === 5. 从 MainActivity 获取历史数据 ===
+    private void loadDataFromActivity(MainActivity mainActivity) {
+        List<AlarmItem> globalList = mainActivity.getGlobalAlarmList();
+        if (globalList != null) {
+            displayAlarmList.clear();
+            // 复制一份，避免直接操作源数据
+            displayAlarmList.addAll(globalList);
+            alarmAdapter.notifyDataSetChanged();
+        }
+    }
+
+    // === 6. 实现接口回调：收到新报警 ===
+    @Override
+    public void onNewAlarm(AlarmItem item) {
+        // 在 UI 线程更新
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                // 将新报警添加到列表头部
+                displayAlarmList.add(0, item);
+                alarmAdapter.notifyItemInserted(0);
+                // 滚动到顶部，确保用户看到最新消息
+                rvAlarmList.scrollToPosition(0);
+            });
+        }
+    }
+
+    // --- 以下是原有的播放器和按钮逻辑 (保持不变) ---
+
+    private void setupClickListeners(View view) {
         ImageButton btnGrid1 = view.findViewById(R.id.btn_grid_1);
         ImageButton btnGrid4 = view.findViewById(R.id.btn_grid_4);
         Button btnDisarm = view.findViewById(R.id.btn_disarm);
@@ -114,11 +157,8 @@ public class AnalysisFragment extends Fragment {
         btnGrid1.setOnClickListener(v -> {
             grid1View.setVisibility(View.VISIBLE);
             grid4View.setVisibility(View.GONE);
-            // 1. 启动大屏
             initializePlayer();
             if (player != null) player.play();
-
-            // 2. 暂停/释放四宫格 (节省资源)
             stopGridPlayers();
             Toast.makeText(getContext(), "切换至单路视频", Toast.LENGTH_SHORT).show();
         });
@@ -126,10 +166,7 @@ public class AnalysisFragment extends Fragment {
         btnGrid4.setOnClickListener(v -> {
             grid1View.setVisibility(View.GONE);
             grid4View.setVisibility(View.VISIBLE);
-            // 切换到四宫格时，可以暂停大屏播放节省资源
-            if (player != null) {
-                player.pause();
-            }
+            if (player != null) player.pause();
             initGridPlayers();
             Toast.makeText(getContext(), "切换至四路视频", Toast.LENGTH_SHORT).show();
         });
@@ -139,72 +176,32 @@ public class AnalysisFragment extends Fragment {
         btnIntercom.setOnClickListener(v -> Toast.makeText(getContext(), "开启对讲", Toast.LENGTH_SHORT).show());
     }
 
-    // 3. 编写初始化播放器的方法
     private void initializePlayer() {
         if (player == null) {
             player = new ExoPlayer.Builder(requireContext()).build();
             playerView.setPlayer(player);
-
-            // === 新增调试代码 开始 ===
-            player.addListener(new androidx.media3.common.Player.Listener() {
-                @Override
-                public void onPlayerError(@NonNull androidx.media3.common.PlaybackException error) {
-                    // 错误会在这里打印出来！
-                    // 如果是 Source Error，说明连不上或者没加 RTSP 包
-                    // 如果是 Decoder Error，说明模拟器不支持这个视频编码
-                    android.util.Log.e("RTSP_DEBUG", "播放失败: " + error.getMessage(), error);
-                    Toast.makeText(getContext(), "播放出错: " + error.getMessage(), Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void onPlaybackStateChanged(int playbackState) {
-                    String stateString;
-                    switch (playbackState) {
-                        case androidx.media3.common.Player.STATE_IDLE: stateString = "空闲"; break;
-                        case androidx.media3.common.Player.STATE_BUFFERING: stateString = "缓冲中..."; break;
-                        case androidx.media3.common.Player.STATE_READY: stateString = "准备就绪"; break;
-                        case androidx.media3.common.Player.STATE_ENDED: stateString = "播放结束"; break;
-                        default: stateString = "未知"; break;
-                    }
-                    android.util.Log.d("RTSP_DEBUG", "当前状态: " + stateString);
-                }
-            });
-            // === 新增调试代码 结束 ===
-            // 设置 RTSP 媒体源
             MediaItem mediaItem = MediaItem.fromUri(rtspUrl);
             player.setMediaItem(mediaItem);
             player.prepare();
         }
-        // 如果当前是单路视图模式，则自动播放
         if (grid1View.getVisibility() == View.VISIBLE) {
             player.play();
         }
     }
 
-
-    // === 新增：初始化四路播放器 ===
     private void initGridPlayers() {
         for (int i = 0; i < 4; i++) {
-            // 如果播放器还没创建，就创建它
             if (gridPlayers[i] == null) {
                 ExoPlayer.Builder builder = new ExoPlayer.Builder(requireContext());
                 gridPlayers[i] = builder.build();
-
-                // 【关键】把播放器画面输出到对应的 SurfaceView 上
                 gridPlayers[i].setVideoSurfaceView(gridSurfaceViews[i]);
-
-                // 设置静音 (4个声音一起放会很吵)
                 gridPlayers[i].setVolume(0f);
             }
-
-            // 如果没有正在播放，就开始加载资源
             if (!gridPlayers[i].isPlaying()) {
                 MediaItem mediaItem = MediaItem.fromUri(gridUrls[i]);
-                // 依然使用 TCP 模式防止花屏
                 MediaSource mediaSource = new RtspMediaSource.Factory()
                         .setForceUseRtpTcp(true)
                         .createMediaSource(mediaItem);
-
                 gridPlayers[i].setMediaSource(mediaSource);
                 gridPlayers[i].prepare();
                 gridPlayers[i].play();
@@ -212,19 +209,16 @@ public class AnalysisFragment extends Fragment {
         }
     }
 
-    // === 新增：停止四路播放器 ===
     private void stopGridPlayers() {
         for (int i = 0; i < 4; i++) {
             if (gridPlayers[i] != null) {
                 gridPlayers[i].stop();
-                // 注意：这里可以选择 release() 彻底销毁，也可以只 stop()
-                // 为了内存考虑，建议切走时彻底销毁，切回来时重建
                 gridPlayers[i].release();
                 gridPlayers[i] = null;
             }
         }
     }
-    // 4. 编写释放播放器的方法
+
     private void releasePlayer() {
         if (player != null) {
             player.release();
@@ -232,19 +226,16 @@ public class AnalysisFragment extends Fragment {
         }
     }
 
-    // 5. 处理 Fragment 生命周期 (非常重要！)
     @Override
     public void onStart() {
         super.onStart();
-        // 当页面可见时，初始化播放器
         initializePlayer();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        // 当页面不可见（比如切到后台或换页面）时，释放资源
         releasePlayer();
-        stopGridPlayers(); // 释放四宫格
+        stopGridPlayers();
     }
 }

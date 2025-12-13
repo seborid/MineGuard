@@ -69,4 +69,14 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.0")
     implementation("org.nanohttpd:nanohttpd:2.3.1")
 
+    // === 新增 Room 数据库依赖 ===
+    val room_version = "2.6.1" // 改用 val
+    implementation("androidx.room:room-runtime:$room_version") // 加上括号
+    annotationProcessor("androidx.room:room-compiler:$room_version") // 加上括号
+
+    // 推荐：生命周期组件 (用于 ViewModel 和 LiveData)
+    val lifecycle_version = "2.6.2" // 改用 val
+    implementation("androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-livedata:$lifecycle_version")
+
 }
